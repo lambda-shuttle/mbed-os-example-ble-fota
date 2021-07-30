@@ -7,3 +7,14 @@ venv/
 # IDE-specific directories
 .vscode/
 .idea/
+
+# Example application dependencies
+mcuboot/target/application/mbed-os-experimental-ble-services/
+mcuboot/target/application/mbed-os/
+mcuboot/target/application/mcuboot/
+mcuboot/target/bootloader/dist/
+mcuboot/target/bootloader/imgtool.egg-info/
+mcuboot/target/bootloader/mbed-os/
+mcuboot/target/bootloader/mcuboot/
+mock/target/mbed-os-experimental-ble-services/
+mock/target/mbed-os/
