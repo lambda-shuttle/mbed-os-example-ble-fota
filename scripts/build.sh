@@ -104,3 +104,26 @@ printf "Installing/updating requirements...\n"
 pip install -q --upgrade pip && pip install -q -r requirements.txt
 
 if [[ $? -ne 0 ]] ; then requirements_failed && return 33; fi
+
+# Install the MbedOS and other requirements for the selected example
+if [[ $example -eq 1 ]] ; then  
+  # Mock example
+  # 1. Install mbed-os and mbed-os-experimental-ble-services; 
+  # 2. Install mbed-os python requirements;
+  cd "$dir/target" && mbed-tools deploy &&
+    pip install -r mbed-os/requirements.txt
+else  
+  # MCUboot example 
+  # 1. Install application dependencies 
+  # 2. Install bootloader dependencies
+  # 3. Install mbed-os python requirements
+  # 4. Install mcuboot requirements and run mcuboot setup script 
+  cd "$dir/target/application" && mbed-tools deploy &&
+    cd "../bootloader" && mbed-tools deploy &&
+      pip install -r mbed-os/requirements.txt &&
+        pip install -r mcuboot/scripts/requirements.txt &&
+          python mcuboot/scripts/setup.py install
+fi
+
+if [[ $? -ne 0 ]] ; then requirements_failed && return 33; fi
+printf "\e[0;32mRequirements successfully installed/updated!\e[0m\n"
