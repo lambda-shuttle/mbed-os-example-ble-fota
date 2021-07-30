@@ -179,7 +179,100 @@ if [[ $example -eq 1 ]] ; then
   fi
 else 
   # MCUboot example 
-  pwd 
+  # Create the signing keys and build the bootloader:
+  # The former inolves generating the RSA-2048 key pair and extracting the 
+  # public key into a C data structure so that it can be built into the 
+  # bootloader
+  printf "Creating the signing keys and building the bootloader...\n"
+  mcuboot/scripts/imgtool.py keygen -k signing-keys.pem -t rsa-2048 &&
+    mcuboot/scripts/imgtool.py getpub -k signing-keys.pem >> signing_keys.c &&
+      mbed compile -t $toolchain -m $target
+
+  if [[ $? -ne 0 ]] ; then build_failed && return 33; fi
+
+  # Building and signing the primary application
+  # The latter involves copying the hex file into the bootloader folder and
+  # signing the application using the RSA-2048 keys
+  printf "Building and signing the primary application...\n"
+  cd "../application" && mbed compile -t $toolchain -m $target &&
+    cp BUILD/$target/$toolchain/application.hex ../bootloader && 
+      cd ../bootloader && 
+        mcuboot/scripts/imgtool.py sign -k signing-keys.pem \
+        --align 4 -v 0.1.0 --header-size 4096 --pad-header -S 0xC0000 \
+        --pad application.hex signed_application.hex
+  
+  if [[ $? -ne 0 ]] ; then build_failed && return 33; fi
+
+  # Deactivate the virtual environment
+  deactivate
+
+  # Create a new temporary virtual enviornment just for pyocd
+  if [[ -d "tmp-venv" ]] ; then
+    printf "Using existing temporary virtual environment...\n" 
+  else 
+    printf "Creating temporary virtual environment...\n"
+
+    # Create the directory and setup the virutal environment
+    mkdir tmp-venv && python3 -m venv tmp-venv
+    # Safety check for errors and proceed to activate the environment
+    if [[ $? -ne 0 ]] ; then 
+      venv_failed && return 33
+    else 
+      source ./tmp-venv/bin/activate
+      printf "\e[0;32mTemporary virtual enviornment activated!\e[0m\n"
+    fi
+  fi
+
+  pip install -q --upgrade pip && pip install -q pyocd==0.30.3 intelhex==2.3.0
+
+  # Creating and flashing the "factory firmware"
+  printf "Creating and flashing the factory firmware...\n"
+  # Check if the mount point is valid
+  if [[ -d $mountpoint ]] ; then 
+    hexmerge.py -o merged.hex --no-start-addr \
+    BUILD/$target/$toolchain/bootloader.hex signed_application.hex &&
+      pyocd erase --chip &&
+        cp merged.hex $mountpoint
+  else 
+    deactivate 
+    invalid_mount && return 33
+  fi
+
+  # Deactivate and remove temporary virtual environment
+  deactivate && rm -rf tmp-venv
+
+  # Activate the primary virtual envionrment
+  source ../../../venv/bin/activate
+  printf "\e[0;32mPrimary virtual enviornment reactivated!\e[0m\n"
+  
+  if [[ $? -ne 0 ]] ; then build_failed && return 33; fi
+
+  # Creating the update binary
+  # This involves changing the application's version number in mbed_app.json
+  # to 0.1.1 and rebuilding it, copying the hex file into the bootloader
+  # folder, signing the udpated application with the RSA-2048 keys and 
+  # generating the raw binary file from signed_update.hex so that it can be
+  # transported over BLE.
+  printf "%b\n" \
+         "Please update the app version number in mbed_app.json" \
+         "Once done, press ENTER to continue..."
+  while read -r -n 1 key 
+  do
+    # if input == ENTER key
+    if [[ -z $key ]]; then
+      break
+    fi
+  done 
+  printf "Creating the update binary...\n"
+  cd ../application && mbed compile -t $toolchain -m $target &&
+    cp BUILD/$target/$toolchain/application.hex ../bootloader && 
+      cd ../bootloader &&
+        mcuboot/scripts/imgtool.py sign -k signing-keys.pem \
+        --align 4 -v 0.1.1 --header-size 4096 --pad-header -S 0x55000 \
+        application.hex signed_update.hex &&
+          arm-none-eabi-objcopy -I ihex -O binary \
+          signed_update.hex signed_update.bin
 fi
 
 if [[ $? -ne 0 ]] ; then build_failed && return 33; fi
+printf "\e[0;32mBuild complete!\e[0m\n"
