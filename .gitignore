@@ -18,3 +18,6 @@ mcuboot/target/bootloader/mbed-os/
 mcuboot/target/bootloader/mcuboot/
 mock/target/mbed-os-experimental-ble-services/
 mock/target/mbed-os/
+
+# CMake build directory
+**/cmake_build
