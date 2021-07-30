@@ -1,0 +1,9 @@
+# macOS Desktop Services Store
+.DS_Store 
+
+# Virtual environment directory
+venv/
+
+# IDE-specific directories
+.vscode/
+.idea/
