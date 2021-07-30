@@ -21,3 +21,18 @@ mock/target/mbed-os/
 
 # CMake build directory
 **/cmake_build
+
+# Example application build files
+mcuboot/target/application/BUILD/
+mcuboot/target/bootloader/application.hex
+mcuboot/target/bootloader/build/
+mcuboot/target/bootloader/merged.hex
+mcuboot/target/bootloader/signed_application.hex
+mcuboot/target/bootloader/signed_update.bin
+mcuboot/target/bootloader/signed_update.hex
+mcuboot/target/bootloader/signing-keys.pem
+mcuboot/target/bootloader/signing_keys.c
+
+# .mbed files
+mcuboot/target/application/.mbed
+mcuboot/target/bootloader/.mbed
