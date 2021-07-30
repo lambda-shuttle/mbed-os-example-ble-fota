@@ -41,14 +41,33 @@ example_dir_exists () {
   return 0
 }
 
+# A message to indicate that there was some issue in installing/updating
+# requirements or dependencies
+requirements_failed () {
+  printf "%b\n"\
+         "\e[1;31mUnable to install requirements!\e[0m"\
+         "Please look at requirements.txt."\
+         "Aborting..."
+}
+
+# A message to indicate that the virtual enviornment creation failed
+venv_failed () {
+  printf "%b\n"\
+         "\e[1;31mFailed to create virtual environment!\e[0m"\
+         "Aborting..."
+}
+
 # Decode the example and assign the directory variable accordingly. If the
 # example requested is invalid, print a helpful message and abort.
+# The example variable is re-assigned to a number for use later on.
 case $example in
   mock) 
     dir="./mock"
+    example=1
     ;;
   mcuboot)
     dir="./mcuboot"
+    example=2
     ;;
   # Note: If there are additional examples, please add them here and update
   #       the options line in the printf below.
@@ -62,4 +81,26 @@ esac
 
 example_dir_exists $dir || return 33
 
+# I. Setup the enviornment
+if [[ -d "venv" ]] ; then
+  printf "Using existing virtual environment...\n" 
+else 
+  printf "Creating virtual environment...\n"
 
+  # Create the directory and setup the virutal environment
+  mkdir venv && python3 -m venv venv
+  # Safety check for errors and proceed to activate the environment
+  if [[ $? -ne 0 ]] ; then 
+    venv_failed && return 33
+  else 
+    source ./venv/bin/activate
+    printf "\e[0;32mVirtual enviornment activated!\e[0m\n"
+  fi
+fi
+
+# Install or update the python dependencies silently and notify if there's any
+# issue in the installation.
+printf "Installing/updating requirements...\n"
+pip install -q --upgrade pip && pip install -q -r requirements.txt
+
+if [[ $? -ne 0 ]] ; then requirements_failed && return 33; fi
