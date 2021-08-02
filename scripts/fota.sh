@@ -49,6 +49,44 @@ EOF
   exit
 }
 
-usage
+clean () {
+  exit
+}
+
+# Default Options:
+example="mock"
+toolchain="GCC_ARM"
+board="NRF52840_DK"
+
+parse_options () {
+  for i in "$@"; do
+    case $i in
+      -e=*|--example=*)   example="${i#*=}"   ; shift  ;;
+      -t=*|--toolchain=*) toolchain="${i#*=}" ; shift  ;;
+      -b=*|--board=*)     board="${i#*=}"     ; shift  ;;
+      -m=*|--mount=*)     mount="${i#*=}"     ; shift  ;;
+      -c|--clean)         clean               ;;
+      -h|--help)          usage               ;;
+      *)                  return 1            ;;
+    esac
+  done
+
+  return 0
+}
+
+# Temporary for debugging purposes
+print_options () {
+  printf "%s\n" \
+         "Selected Options:" \
+         "--example    ${example}" \
+         "--toolchain  ${toolchain}" \
+         "--board      ${board}" \
+         "--mount      ${mount}"
+
+  return 0
+}
+
+parse_options "$@" || exit 1
+print_options
 
 exit 0
