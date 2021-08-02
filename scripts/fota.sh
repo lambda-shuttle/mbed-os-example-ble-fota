@@ -58,6 +58,9 @@ example="mock"
 toolchain="GCC_ARM"
 board="NRF52840_DK"
 
+# Root directory of repository
+root=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+
 parse_options () {
   for i in "$@"; do
     case $i in
@@ -74,19 +77,6 @@ parse_options () {
   return 0
 }
 
-# Temporary for debugging purposes
-print_options () {
-  printf "%s\n" \
-         "Selected Options:" \
-         "--example    ${example}" \
-         "--toolchain  ${toolchain}" \
-         "--board      ${board}" \
-         "--mount      ${mount}"
-
-  return 0
-}
-
 parse_options "$@" || exit 1
-print_options
 
 exit 0
