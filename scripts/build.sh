@@ -25,9 +25,10 @@ example=$1     # mock or mcuboot
 mount_point=$2  # mount point of board - use mbedls to find this information
 
 # Check if the file is being sourced instead of executed
-[[ "${BASH_SOURCE[0]}" == "${0}" ]] && 
-  echo "Script ${BASH_SOURCE[0]} isn't being sourced...\n" &&
-    exit 30
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  printf "%s\n" "Script ${BASH_SOURCE[0]} isn't being sourced..."
+  exit 1
+fi
 
 # Make sure that the example directory exists; else, print a helpful message
 # and return the appropriate value to abort.
