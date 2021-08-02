@@ -23,3 +23,24 @@ setup_formatting () {
   _bold='\e[1m'
   _red='\e[1;31m'
 }
+
+# Says (i.e. prints) a message to the console with formatting based on the selected formatting mode.
+say () {
+  case $1 in
+    error)
+      # The first line of the message is treated as the message heading and is marked in bold red along with an "ERROR:"
+      # prefix. Subsequent message lines are presented with default formatting unless otherwise formatted beforehand.
+      # All output is directed to stderr.
+      heading=${2-"ERROR"}
+      printf "%b\n" \
+             "${_bold}${_red}ERROR: $heading${_clear}" \
+             "${@:3}" >&2
+      ;;
+    success) # Do nothing
+      ;;
+    message) # Do nothing
+      ;;
+    *) # Unknown error
+      ;;
+  esac
+}
