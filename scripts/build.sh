@@ -22,7 +22,7 @@ target=NRF52840_DK
 toolchain=GCC_ARM
 
 example=$1     # mock or mcuboot
-mountpoint=$2  # mount point of board - use mbedls to find this information 
+mount_point=$2  # mount point of board - use mbedls to find this information
 
 # Check if the file is being sourced instead of executed
 [[ "${BASH_SOURCE[0]}" == "${0}" ]] && 
@@ -51,7 +51,7 @@ requirements_failed () {
          "Aborting..."
 }
 
-# A message to indicate that the virtual enviornment creation failed
+# A message to indicate that the virtual environment creation failed
 venv_failed () {
   printf "%b\n"\
          "\e[1;31mFailed to create virtual environment!\e[0m"\
@@ -100,7 +100,7 @@ case $example in
 esac
 
 # Check if the mount point is provided
-if [ -z "$mountpoint" ] ; then
+if [ -z "$mount_point" ] ; then
     printf "%b\n"\
            "\e[1;31mMount point argument missing!\e[0m"\
            "Use mbedls to detect the mount point of the board." \
@@ -111,20 +111,20 @@ fi
 
 example_dir_exists $dir || return 33
 
-# I. Setup the enviornment
+# I. Setup the environment
 if [[ -d "venv" ]] ; then
   printf "Using existing virtual environment...\n" 
 else 
   printf "Creating virtual environment...\n"
 
-  # Create the directory and setup the virutal environment
+  # Create the directory and setup the virtual environment
   mkdir venv && python3 -m venv venv
   # Safety check for errors and proceed to activate the environment
   if [[ $? -ne 0 ]] ; then 
     venv_failed && return 33
   else 
     source ./venv/bin/activate
-    printf "\e[0;32mVirtual enviornment activated!\e[0m\n"
+    printf "\e[0;32mVirtual environment activated!\e[0m\n"
   fi
 fi
 
@@ -167,20 +167,20 @@ if [[ $example -eq 1 ]] ; then
   out=cmake_build/$target/develop/$toolchain
 
   # Check if the mount point is valid
-  if [[ -d $mountpoint ]] ; then 
+  if [[ -d $mount_point ]] ; then
     # Compile the example and flash the board with the binary
     mbed-tools compile -t $toolchain -m $target &&
       arm-none-eabi-objcopy -O binary \
       $out/BLE_GattServer_FOTAService.elf \
       $out/BLE_GattServer_FOTAService.bin &&
-        cp $out/BLE_GattServer_FOTAService.bin $mountpoint
+        cp $out/BLE_GattServer_FOTAService.bin $mount_point
   else 
     invalid_mount && return 33
   fi
 else 
   # MCUboot example 
   # Create the signing keys and build the bootloader:
-  # The former inolves generating the RSA-2048 key pair and extracting the 
+  # The former involves generating the RSA-2048 key pair and extracting the
   # public key into a C data structure so that it can be built into the 
   # bootloader
   printf "Creating the signing keys and building the bootloader...\n"
@@ -206,20 +206,20 @@ else
   # Deactivate the virtual environment
   deactivate
 
-  # Create a new temporary virtual enviornment just for pyocd
+  # Create a new temporary virtual environment just for pyocd
   if [[ -d "tmp-venv" ]] ; then
     printf "Using existing temporary virtual environment...\n" 
   else 
     printf "Creating temporary virtual environment...\n"
 
-    # Create the directory and setup the virutal environment
+    # Create the directory and setup the virtual environment
     mkdir tmp-venv && python3 -m venv tmp-venv
     # Safety check for errors and proceed to activate the environment
     if [[ $? -ne 0 ]] ; then 
       venv_failed && return 33
     else 
       source ./tmp-venv/bin/activate
-      printf "\e[0;32mTemporary virtual enviornment activated!\e[0m\n"
+      printf "\e[0;32mTemporary virtual environment activated!\e[0m\n"
     fi
   fi
 
@@ -228,11 +228,11 @@ else
   # Creating and flashing the "factory firmware"
   printf "Creating and flashing the factory firmware...\n"
   # Check if the mount point is valid
-  if [[ -d $mountpoint ]] ; then 
+  if [[ -d $mount_point ]] ; then
     hexmerge.py -o merged.hex --no-start-addr \
     BUILD/$target/$toolchain/bootloader.hex signed_application.hex &&
       pyocd erase --chip &&
-        cp merged.hex $mountpoint
+        cp merged.hex $mount_point
   else 
     deactivate 
     invalid_mount && return 33
@@ -241,16 +241,16 @@ else
   # Deactivate and remove temporary virtual environment
   deactivate && rm -rf tmp-venv
 
-  # Activate the primary virtual envionrment
+  # Activate the primary virtual environment
   source ../../../venv/bin/activate
-  printf "\e[0;32mPrimary virtual enviornment reactivated!\e[0m\n"
+  printf "\e[0;32mPrimary virtual environment reactivated!\e[0m\n"
   
   if [[ $? -ne 0 ]] ; then build_failed && return 33; fi
 
   # Creating the update binary
   # This involves changing the application's version number in mbed_app.json
   # to 0.1.1 and rebuilding it, copying the hex file into the bootloader
-  # folder, signing the udpated application with the RSA-2048 keys and 
+  # folder, signing the updated application with the RSA-2048 keys and
   # generating the raw binary file from signed_update.hex so that it can be
   # transported over BLE.
   printf "%b\n" \
