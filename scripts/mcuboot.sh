@@ -13,6 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Prompt the end-user on whether they'd like the script to automatically update the application version number in the
+# mbed_app.json file. This is especially useful for the CI workflow where "yes" would be piped into the script.
+prompt_auto_update () {
+  while true; do
+    read -rp "Do you wish to auto-update the version number in application/mbed_app.json? " response
+    case $response in
+        [Yy]*) auto_update=1                          ; break ;;
+        [Nn]*) auto_update=0                          ; break ;;
+        *)     say message "Please answer yes or no." ;;
+    esac
+  done
+}
+
 # Builds the mcuboot example and flashes the binaries if a mount is provided.
 # Please refer to the commented steps for more information
 # Pre: Arguments passed here are all valid
@@ -128,6 +141,30 @@ mcuboot_build () {
 
   # 15. Deactivate and restore virtual environment
   deactivate && rm -rf venv && source "$root/venv/bin/activate"
+  
+  # 16. Creating the update binary
+  # This involves changing the application's version number in mbed_app.json to 0.1.1 and rebuilding it, copying the
+  # hex file into the bootloader folder, signing the updated application with the RSA-2048 keys and generating the raw
+  # binary file from the signed_update.hex so that it can be transported over BLE.
+  prompt_auto_update
+
+  if [[ "$auto_update" -eq 0 ]]; then
+    # User updates the binary manually, in which case we wait for them to do so
+    say message "Please update the app version number in application/mbed_app.json" \
+                "Once done, press ENTER to continue..."
+    while read -r -n 1 key
+    do
+      # if input == ENTER key
+      [ -z "$key" ] && break
+    done
+  else
+    # Use jq to update the binary
+    # shellcheck disable=SC2015
+    cd "$application" && \
+      jq '."config"."version-number"."value" = "\"0.1.1\""' --indent 4 mbed_app.json > tmp.$$.json \
+        && mv tmp.$$.json mbed_app.json || \
+          fail exit "Failed in updating application/mbed_app.json" "Please check scripts/mcuboot.sh"
+  fi
 }
 
 # A dummy clean function
