@@ -62,15 +62,17 @@ board="NRF52840_DK"
 root=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 parse_options () {
-  for i in "$@"; do
-    case $i in
-      -e=*|--example=*)   example="${i#*=}"   ; shift  ;;
-      -t=*|--toolchain=*) toolchain="${i#*=}" ; shift  ;;
-      -b=*|--board=*)     board="${i#*=}"     ; shift  ;;
-      -m=*|--mount=*)     mount="${i#*=}"     ; shift  ;;
-      -c|--clean)         clean               ;;
-      -h|--help)          usage               ;;
-      *)                  return 1            ;;
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+
+    case $key in
+      -e|--example)   example="$2"   ; shift 2 ;;
+      -t|--toolchain) toolchain="$2" ; shift 2 ;;
+      -b|--board)     board="$2"     ; shift 2 ;;
+      -m|--mount)     mount="$2"     ; shift 2 ;;
+      -c|--clean)     clean          ;;
+      -h|--help)      usage          ;;
+      *)              return 1       ;;
     esac
   done
 
