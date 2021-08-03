@@ -58,6 +58,7 @@ EOF
 # This function would clean up the example builds and generated files
 clean () {
   rm -rf "$root/venv"
+  say success "All neat and tidy now"
   exit
 }
 
@@ -141,6 +142,15 @@ setup_virtualenv () {
   say success "Virtual environment activated"
 }
 
+# Installs the required python dependencies silently and notify if there's any issue in the installation.
+install_requirements () {
+  say message "Installing/updating requirements silently..."
+  # shellcheck disable=SC2015
+  pip install -q --upgrade pip && pip install -q -r "$root/requirements.txt" \
+    || fail exit "Unable to install requirements!" "Please take a look at requirements.txt"
+  say success "General requirements installed/updated"
+}
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Main Program
 #-----------------------------------------------------------------------------------------------------------------------
@@ -158,6 +168,7 @@ main () {
 
   check_usage
   setup_virtualenv
+  install_requirements
 }
 
 main "$@"
