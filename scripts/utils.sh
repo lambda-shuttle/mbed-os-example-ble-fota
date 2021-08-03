@@ -23,6 +23,7 @@ setup_formatting () {
   _bold='\e[1m'
   _red='\e[31m'
   _green='\e[32m'
+  _yellow='\e[33m'
 }
 
 # Says (i.e. prints) a message to the console with formatting based on the selected formatting mode.
@@ -45,6 +46,12 @@ say () {
       ;;
     message)
       printf "%b\n" "${@:2}"
+      ;;
+    note)
+      heading=${2-"NOTE"}
+      printf "%b\n" \
+             "${_bold}${_yellow}NOTE: $heading${_clear}" \
+             "${@:3}"
       ;;
     *) # Unknown error
       ;;
