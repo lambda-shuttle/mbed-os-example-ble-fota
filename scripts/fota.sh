@@ -85,8 +85,7 @@ parse_options () {
 # indicating that binaries will have to be flashed manually.
 valid_mount () {
   if [[ -z $mount ]]; then
-    say message "Mount point not provided - binaries will not be flashed." \
-                "Please flash them manually."
+    say note "Mount point not provided - binaries will not be flashed."
     skip=1
   else
     [ -d "$mount" ] || fail exit "Mount point invalid" \
