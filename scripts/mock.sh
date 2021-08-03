@@ -15,7 +15,9 @@
 
 source scripts/utils.sh
 
-# A dummy build function that echos arguments passed to it
+# Builds the mock example and flashes the binary if a mount point is provided
+# Please refer to the commented steps for more information
+# Pre: Arguments passed here are all valid
 mock_build () {
   toolchain=$1; board=$2; mount=$3; skip=$4; root=$5
 
@@ -32,8 +34,8 @@ mock_build () {
   # A short message addressing the known Click dependency conflict - this should be removed once resolved.
   say note "Click dependency conflict" \
            "This is a known issue and does not hinder the build process" \
-           "Refer to documentation for more information"
-  say success "Example requirements successfully installed/updated"
+           "Refer to the documentation for more information"
+  say success "Example requirements installed/updated"
 
   out="cmake_build/$board/develop/$toolchain"
   # 3. Compile the example with the target board and toolchain
@@ -59,6 +61,7 @@ mock_build () {
 }
 
 # Clean build files and dependencies specific to this example
+# Pre: root is valid
 mock_clean () {
   root=$1
   rm -rf "$root/mock/target/cmake_build"
