@@ -57,14 +57,6 @@ clean () {
   exit
 }
 
-# Default Options:
-example="mock"
-toolchain="GCC_ARM"
-board="NRF52840_DK"
-
-# Root directory of repository
-root=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
-
 parse_options () {
   for i in "$@"; do
     case $i in
@@ -81,7 +73,18 @@ parse_options () {
   return 0
 }
 
-setup_formatting
-parse_options "$@" || fail exit "Unrecognised option" "Please use -h or --help for usage"
+main () {
+  # Default Options:
+  example="mock"
+  toolchain="GCC_ARM"
+  board="NRF52840_DK"
 
-exit 0
+  # Root directory of repository
+  root=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+
+  setup_formatting
+  parse_options "$@" || fail exit "Unrecognised option" "Please use -h or --help for usage"
+}
+
+main "$@"
+exit
