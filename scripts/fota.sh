@@ -86,9 +86,9 @@ valid_mount () {
   say message "Mount point not provided - binaries will not be flashed." \
               "Please flash them manually."
   else
-    [ ! -d "$mount" ] && fail exit "Mount point invalid" \
-                                   "Please check the path and if the board is connected" \
-                                   "Tip: Use mbed-ls to identify the mount point path"
+    [ -d "$mount" ] || fail exit "Mount point invalid" \
+                                 "Please check the path and if the board is connected" \
+                                 "Tip: Use mbed-ls to identify the mount point path"
   fi
 }
 
