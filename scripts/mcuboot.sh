@@ -59,12 +59,11 @@ mcuboot_build () {
            "Refer to the documentation for more information"
 
   # 4. Install mcuboot requirements (silently)
-  # shellcheck disable=SC2015
-  cd mcuboot/scripts && pip install -q -r requirements.txt || \
+  pip install -q -r mcuboot/scripts/requirements.txt || \
     fail exit "Unable to install mcuboot requirements" "Please take a look at mcuboot/scripts/requirements.txt"
 
   # 5. Run mcuboot setup script (silently)
-  python setup.py install > /dev/null 2>&1 || \
+  python mcuboot/scripts/setup.py install > /dev/null 2>&1 || \
     fail exit "MCUboot setup script failed"
 
   say success "Example requirements installed/updated"
@@ -73,7 +72,7 @@ mcuboot_build () {
   # 6. Create the signing keys (silently)
   # Note: This does not silence errors.
   # shellcheck disable=SC2015
-  cd "$bootloader" && mcuboot/scripts/imgtool.py keygen -k signing-keys.pem -t rsa-2048 >/dev/null && \
+  mcuboot/scripts/imgtool.py keygen -k signing-keys.pem -t rsa-2048 >/dev/null && \
     mcuboot/scripts/imgtool.py getpub -k signing-keys.pem >> signing_keys.c || \
       fail exit "Unable to create the signing keys"
 
@@ -91,6 +90,7 @@ mcuboot_build () {
   cd "$application" && mbed compile -t "$toolchain" -m "$board" >/dev/null || \
     fail exit "Failed to compile the bootloader" "Please check the sources"
 
+  # shellcheck disable=SC2015
   cp "BUILD/$board/$toolchain/application.hex" "$bootloader" && cd "$bootloader" && \
     mcuboot/scripts/imgtool.py sign -k signing-keys.pem \
     --align 4 -v 0.1.0 --header-size 4096 --pad-header -S 0xC0000 \
@@ -106,7 +106,7 @@ mcuboot_build () {
   # 9. Deactivate the primary virtual environment
   deactivate
 
-  say message "Creating temporary virtual enviornment..."
+  say message "Creating temporary virtual environment..."
 
   # 10. Create a new, temporary virtual environment just for pyocd and intelhex
   # shellcheck disable=SC2015
@@ -141,7 +141,7 @@ mcuboot_build () {
 
   # 15. Deactivate and restore virtual environment
   deactivate && rm -rf venv && source "$root/venv/bin/activate"
-  
+
   # 16. Creating the update binary
   # This involves changing the application's version number in mbed_app.json to 0.1.1 and rebuilding it, copying the
   # hex file into the bootloader folder, signing the updated application with the RSA-2048 keys and generating the raw
@@ -165,6 +165,25 @@ mcuboot_build () {
         && mv tmp.$$.json mbed_app.json || \
           fail exit "Failed in updating application/mbed_app.json" "Please check scripts/mcuboot.sh"
   fi
+
+  say message "Creating the update binary..."
+
+  # shellcheck disable=SC2015
+  cd "$application" && mbed compile -t "$toolchain" -m "$board" >/dev/null || \
+    fail exit "Failed to compile the application" "Please check the sources"
+
+  # shellcheck disable=SC2015
+  cp "BUILD/$board/$toolchain/application.hex" "$bootloader" && cd "$bootloader" && \
+    mcuboot/scripts/imgtool.py sign -k signing-keys.pem \
+    --align 4 -v 0.1.1 --header-size 4096 --pad-header -S 0x55000 \
+    application.hex signed_update.hex || \
+      fail exit "Unable to sign the updated application"
+
+  arm-none-eabi-objcopy -I ihex -O binary signed_update.hex signed_update.bin || \
+    fail exit "Failed to extract binary from elf" "Tip: Check if arm-none-eabi-objcopy is in your path"
+
+  say message "Update binary at $root/mcuboot/target/bootloader/signed_update.hex"
+  say success "Build Complete" "Please refer to the documentation for demonstration instructions"
 }
 
 # A dummy clean function
