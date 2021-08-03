@@ -157,7 +157,7 @@ install_requirements () {
 # Call the build functions corresponding to the selected example
 # Pre: The example is valid and so are all other arguments.
 build_example () {
-  args=("$toolchain $board $mount $skip $root")
+  args=("$toolchain" "$board" "$mount" "$skip" "$root")
   case $example in
     mock)    mock_build "${args[@]}"    ;;
     mcuboot) mcuboot_build "${args[@]}" ;;
