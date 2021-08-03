@@ -28,6 +28,7 @@ set -e
 
 source scripts/utils.sh
 
+# Display a neatly formatted message on how to use this tool
 usage () {
   cat <<EOF
 Usage: $(basename "${BASH_SOURCE[0]}") [options]
@@ -53,10 +54,15 @@ EOF
   exit
 }
 
+# To be completed..
+# This function would clean up the example builds and generated files
 clean () {
   exit
 }
 
+# Parses the options specified by the end-user and either assigns the corresponding variable or calls a function and
+# exits (i.e. in the case of help and clean). If the option is unrecognised, the function returns 1, which triggers
+# a fail that exits the tools and displays an error on stderr.
 parse_options () {
   for i in "$@"; do
     case $i in
@@ -73,6 +79,9 @@ parse_options () {
   return 0
 }
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Main Program
+#-----------------------------------------------------------------------------------------------------------------------
 main () {
   # Default Options:
   example="mock"
