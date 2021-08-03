@@ -108,11 +108,20 @@ valid_board () {
   esac
 }
 
+# Checks if the toolchain is GCC_ARM as it's the only one supported. The ARM toolchain may be supported in the future.
+valid_toolchain () {
+  case $toolchain in
+    GCC_ARM) ;;
+    *) fail exit "Unsupported toolchain" "The only supported toolchain is GCC_ARM"
+  esac
+}
+
 # A series of checks to make sure that the program options are valid
 check_usage () {
   valid_mount
   valid_example
   valid_board
+  valid_toolchain
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
