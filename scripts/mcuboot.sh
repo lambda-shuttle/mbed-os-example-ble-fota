@@ -186,7 +186,20 @@ mcuboot_build () {
   say success "Build Complete" "Please refer to the documentation for demonstration instructions"
 }
 
-# A dummy clean function
+# Clean build files and dependencies specific to this example
+# Pre: root is valid
 mcuboot_clean () {
-  : # Do nothing
+  root=$1
+  application="$root/mcuboot/target/application"
+  bootloader="$root/mcuboot/target/bootloader"
+
+  # Remove generated files and folders in bootloader folder
+  rm -rf "$bootloader"/sign* "$bootloader/application.hex" "$bootloader/merged.hex"
+  rm -rf "$bootloader/build" "$bootloader/dist" "$bootloader/imgtool.egg-info"
+
+  # Remove bootloader dependencies
+  rm -rf "$bootloader/mbed-os" "$bootloader/mcuboot"
+
+  # Remove application build folder and dependencies
+  rm -rf "$application/BUILD" "$application/mbed-os" "$application/mbed-os-experimental-ble-services" "$application/mcuboot"
 }
