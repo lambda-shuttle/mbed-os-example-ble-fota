@@ -59,6 +59,8 @@ EOF
 
 # This function would clean up the example builds and generated files
 clean () {
+  say message "Cleaning builds and generated files..."
+  
   rm -rf "$root/venv"
 
   # Clean example-specific files and folders
