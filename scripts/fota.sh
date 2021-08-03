@@ -24,6 +24,10 @@
 # Important: The tool assumes the target board and toolchain unless otherwise specified by the end-user. However,
 #            currently, the only board and toolchain supported are NRF52840_DK and GCC_ARM respectively.
 
+set -e
+
+source scripts/utils.sh
+
 usage () {
   cat <<EOF
 Usage: $(basename "${BASH_SOURCE[0]}") [options]
@@ -77,6 +81,7 @@ parse_options () {
   return 0
 }
 
-parse_options "$@" || exit 1
+setup_formatting
+parse_options "$@" || fail exit "Unrecognised option" "Please use -h or --help for usage"
 
 exit 0
