@@ -75,8 +75,6 @@ parse_options () {
       *)                  return 1            ;;
     esac
   done
-
-  return 0
 }
 
 # Check that the provided target board mount point is valid. If the mount point is not provided, display a short message
@@ -92,9 +90,19 @@ valid_mount () {
   fi
 }
 
+# Checks if the example is either mock or mcuboot. If more examples, are added in the future, this function would have
+# to be modified accordingly.
+valid_example () {
+  case $example in
+    mock|mcuboot) ;;
+    *) fail exit "Invalid example" "Supported examples - [mock|mcuboot]" ;;
+  esac
+}
+
 # A series of checks to make sure that the program options are valid
 check_usage () {
   valid_mount
+  valid_example
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
