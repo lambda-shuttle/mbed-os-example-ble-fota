@@ -21,7 +21,8 @@
 setup_formatting () {
   _clear='\e[0m'
   _bold='\e[1m'
-  _red='\e[1;31m'
+  _red='\e[31m'
+  _green='\e[32m'
 }
 
 # Says (i.e. prints) a message to the console with formatting based on the selected formatting mode.
@@ -36,9 +37,14 @@ say () {
              "${_bold}${_red}ERROR: $heading${_clear}" \
              "${@:3}" >&2
       ;;
-    success) # Do nothing
+    success)
+      heading=${2-"SUCCESS"}
+      printf "%b\n" \
+             "${_bold}${_green}SUCCESS: $heading${_clear}" \
+             "${@:3}"
       ;;
-    message) # Do nothing
+    message)
+      printf "%b\n" "${@:2}"
       ;;
     *) # Unknown error
       ;;
