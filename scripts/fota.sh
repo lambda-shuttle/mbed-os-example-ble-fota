@@ -57,6 +57,7 @@ EOF
 # To be completed..
 # This function would clean up the example builds and generated files
 clean () {
+  rm -rf "$root/venv"
   exit
 }
 
@@ -124,6 +125,22 @@ check_usage () {
   valid_toolchain
 }
 
+# Setups up the main virtual environment and activates it
+setup_virtualenv () {
+  if [[ -d venv ]]; then
+    say message "Using existing virtual environment venv..."
+  else
+    say message "Creating virtual environment..."
+
+    # Create the venv directory and setup the virtual environment
+    # shellcheck disable=SC2015
+    mkdir venv && python3 -m venv venv \
+      || fail exit "Virtual environment creation failed!" "Tip: Check your python installation!"
+  fi
+  source venv/bin/activate
+  say success "Virtual environment activated"
+}
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Main Program
 #-----------------------------------------------------------------------------------------------------------------------
@@ -140,6 +157,7 @@ main () {
   parse_options "$@" || fail exit "Unrecognised option" "Please use -h or --help for usage"
 
   check_usage
+  setup_virtualenv
 }
 
 main "$@"
