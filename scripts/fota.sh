@@ -25,6 +25,7 @@
 #            currently, the only board and toolchain supported are NRF52840_DK and GCC_ARM respectively.
 
 set -e
+trap 'cleanup $?' SIGINT SIGTERM ERR EXIT
 
 source scripts/utils.sh
 source scripts/mock.sh
@@ -164,6 +165,12 @@ build_example () {
     mock)    mock_build "${args[@]}"    ;;
     mcuboot) mcuboot_build "${args[@]}" ;;
   esac
+}
+
+# Cleanup routine that runs when the program exits (either successfully or abruptly)
+cleanup () {
+  # If unsuccessful termination, then clean the build
+  [ "$1" -eq 1 ] && clean
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
