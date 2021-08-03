@@ -27,6 +27,8 @@
 set -e
 
 source scripts/utils.sh
+source scripts/mock.sh
+source scripts/mcuboot.sh
 
 # Display a neatly formatted message on how to use this tool
 usage () {
@@ -83,8 +85,9 @@ parse_options () {
 # indicating that binaries will have to be flashed manually.
 valid_mount () {
   if [[ -z $mount ]]; then
-  say message "Mount point not provided - binaries will not be flashed." \
-              "Please flash them manually."
+    say message "Mount point not provided - binaries will not be flashed." \
+                "Please flash them manually."
+    skip=1
   else
     [ -d "$mount" ] || fail exit "Mount point invalid" \
                                  "Please check the path and if the board is connected" \
@@ -151,6 +154,16 @@ install_requirements () {
   say success "General requirements installed/updated"
 }
 
+# Call the build functions corresponding to the selected example
+# Pre: The example is valid and so are all other arguments.
+build_example () {
+  args=("$toolchain $board $mount $skip")
+  case $example in
+    mock)    mock_build "${args[@]}"    ;;
+    mcuboot) mcuboot_build "${args[@]}" ;;
+  esac
+}
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Main Program
 #-----------------------------------------------------------------------------------------------------------------------
@@ -159,6 +172,7 @@ main () {
   example="mock"
   toolchain="GCC_ARM"
   board="NRF52840_DK"
+  skip=0               # Skip the binary flashing if mount point is missing - Default: false
 
   # Root directory of repository
   root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd -P)
@@ -169,6 +183,7 @@ main () {
   check_usage
   setup_virtualenv
   install_requirements
+  build_example
 }
 
 main "$@"
