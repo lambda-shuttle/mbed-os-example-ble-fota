@@ -134,7 +134,7 @@ main () {
   board="NRF52840_DK"
 
   # Root directory of repository
-  root=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+  root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd -P)
 
   setup_formatting
   parse_options "$@" || fail exit "Unrecognised option" "Please use -h or --help for usage"
