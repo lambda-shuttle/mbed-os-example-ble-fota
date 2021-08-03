@@ -79,6 +79,24 @@ parse_options () {
   return 0
 }
 
+# Check that the provided target board mount point is valid. If the mount point is not provided, display a short message
+# indicating that binaries will have to be flashed manually.
+valid_mount () {
+  if [[ -z $mount ]]; then
+  say message "Mount point not provided - binaries will not be flashed." \
+              "Please flash them manually."
+  else
+    [ ! -d "$mount" ] && fail exit "Mount point invalid" \
+                                   "Please check the path and if the board is connected" \
+                                   "Tip: Use mbed-ls to identify the mount point path"
+  fi
+}
+
+# A series of checks to make sure that the program options are valid
+check_usage () {
+  valid_mount
+}
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Main Program
 #-----------------------------------------------------------------------------------------------------------------------
@@ -93,6 +111,8 @@ main () {
 
   setup_formatting
   parse_options "$@" || fail exit "Unrecognised option" "Please use -h or --help for usage"
+
+  check_usage
 }
 
 main "$@"
