@@ -99,10 +99,20 @@ valid_example () {
   esac
 }
 
+# Checks if the board is NRF52840_DK as it's currently the only supported board. This function will have to be modified
+# when DISCO_L475VG_IOT01A (and maybe other boards) are supported at a later point.
+valid_board () {
+  case $board in
+    NRF52840_DK) ;;
+    *) fail exit "Unsupported board" "The only supported board is NRF52840_DK"
+  esac
+}
+
 # A series of checks to make sure that the program options are valid
 check_usage () {
   valid_mount
   valid_example
+  valid_board
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
