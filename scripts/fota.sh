@@ -32,15 +32,15 @@ A simple cli tool to automate the setup and build process for Bluetooth-LE
 Firmware Over the Air (FOTA) examples
 
 Options:
--e, --example TEXT             The example you are trying to setup and build.
-                               [default: mock]
--t, --toolchain [GCC_ARM|ARM]  The toolchain you are using to build your app.
-                               [default: GCC_ARM]
--b, --board TEXT               A build target for an Mbed-enabled device.
-                               [default: NRF52840_DK]
--m, --mount TEXT               Path to the mount point of the target board.
--c, --clean                    Clean the example builds and environment
--h, --help                     Print this message and exit
+-e=, --example=TEXT             The example you are trying to setup and build.
+                                [default: mock]
+-t=, --toolchain=[GCC_ARM|ARM]  The toolchain you are using to build your app.
+                                [default: GCC_ARM]
+-b=, --board=TEXT               A build target for an Mbed-enabled device.
+                                [default: NRF52840_DK]
+-m=, --mount=TEXT               Path to the mount point of the target board.
+-c, --clean                     Clean the example builds and environment
+-h, --help                      Print this message and exit
 
 Note:
 For now, only the NRF52840_DK board and GCC_ARM toolchain are supported. Also,
