@@ -17,3 +17,8 @@
 mcuboot_build () {
   echo "MCUboot Build:" "$@"
 }
+
+# A dummy clean function
+mcuboot_clean () {
+  : # Do nothing
+}

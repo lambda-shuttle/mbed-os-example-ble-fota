@@ -57,3 +57,11 @@ mock_build () {
 
   say success "Build Complete" "Please refer to the documentation for demonstration instructions"
 }
+
+# Clean build files and dependencies specific to this example
+mock_clean () {
+  root=$1
+  rm -rf "$root/mock/target/cmake_build"
+  rm -rf "$root/mock/target/mbed-os"
+  rm -rf "$root/mock/target/mbed-os-experimental-ble-services"
+}

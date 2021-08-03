@@ -56,12 +56,15 @@ EOF
   exit
 }
 
-# To be completed..
 # This function would clean up the example builds and generated files
 clean () {
   rm -rf "$root/venv"
-  say success "All neat and tidy now"
-  exit
+
+  # Clean example-specific files and folders
+  mock_clean "$root"
+  mcuboot_clean "$root"
+
+  say success "All neat and tidy now" && exit
 }
 
 # Parses the options specified by the end-user and either assigns the corresponding variable or calls a function and
