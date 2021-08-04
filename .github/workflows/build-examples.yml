@@ -14,6 +14,9 @@ jobs:
       # Checkout the repo and download it to the runner
       - name: Checkout
         uses: actions/checkout@v2
+      # Install the venv module 
+      - name: Install dependencies
+        run: apt install python3-venv
       # Run the fota build tool with mock as the option
       - name: Build example
         run: ./scripts/fota.sh -e=mock
@@ -26,8 +29,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       # jq is a command-line JSON processor
-      - name: Install jq
-        run: sudo apt-get install jq
+      - name: Install dependencies
+        run: apt-get install jq && apt install python3-venv
       # Pipe "yes" into the script to select the appropriate option
       # More information about this in the documentation
       # Run the fota build tool with mcuboot as the option
