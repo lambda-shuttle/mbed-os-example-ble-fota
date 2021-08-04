@@ -9,6 +9,7 @@ on:
 jobs:
   build-mock:
     runs-on: ubuntu-latest
+    container: mbedos/mbed-os-env:latest
     steps:
       # Checkout the repo and download it to the runner
       - name: Checkout
@@ -19,6 +20,7 @@ jobs:
 
   build-mcuboot:
     runs-on: ubuntu-latest
+    container: mbedos/mbed-os-env:latest
     steps:
       # Checkout the repo and download it to the runner
       - name: Checkout
