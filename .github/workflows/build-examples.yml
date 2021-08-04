@@ -1,0 +1,33 @@
+name: Build Examples
+on:
+  # Trigger the workflow on push, but only for main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  pull_request:
+jobs:
+  build-mock:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repo and download it to the runner
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Run the fota build tool with mock as the option
+      - name: Build example
+        run: ./scripts/fota.sh -e=mock
+
+  build-mcuboot:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the repo and download it to the runner
+      - name: Checkout
+        uses: actions/checkout@v2
+      # jq is a command-line JSON processor
+      - name: Install jq
+        run: sudo apt-get install jq
+      # Pipe "yes" into the script to select the appropriate option
+      # More information about this in the documentation
+      # Run the fota build tool with mcuboot as the option
+      - name: Build example
+        run: yes | ./scripts/fota.sh -e=mcuboot
