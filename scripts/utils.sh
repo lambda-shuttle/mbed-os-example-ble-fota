@@ -60,8 +60,6 @@ say () {
 
 # Prints an error message to stderr and exits (or returns) with a code of 1
 fail () {
-  local mode=${1}
-  local msg=( "${@:2}" )
-  say error "${msg[@]}"
-  $mode 1
+  say error "$@"
+  exit 1
 }
