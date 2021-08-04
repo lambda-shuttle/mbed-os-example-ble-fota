@@ -1,0 +1,6 @@
+bleak==0.12.1
+cmake==3.20.5
+mbed-cli==1.10.5
+mbed-tools==7.28.1
+mercurial==5.8
+ninja==1.10.0.post2

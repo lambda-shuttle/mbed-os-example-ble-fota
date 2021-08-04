@@ -1,0 +1,38 @@
+# macOS Desktop Services Store
+.DS_Store 
+
+# Virtual environment directory
+venv/
+
+# IDE-specific directories
+.vscode/
+.idea/
+
+# Example application dependencies
+mcuboot/target/application/mbed-os-experimental-ble-services/
+mcuboot/target/application/mbed-os/
+mcuboot/target/application/mcuboot/
+mcuboot/target/bootloader/dist/
+mcuboot/target/bootloader/imgtool.egg-info/
+mcuboot/target/bootloader/mbed-os/
+mcuboot/target/bootloader/mcuboot/
+mock/target/mbed-os-experimental-ble-services/
+mock/target/mbed-os/
+
+# CMake build directory
+**/cmake_build
+
+# Example application build files
+mcuboot/target/application/BUILD/
+mcuboot/target/bootloader/application.hex
+mcuboot/target/bootloader/build/
+mcuboot/target/bootloader/merged.hex
+mcuboot/target/bootloader/signed_application.hex
+mcuboot/target/bootloader/signed_update.bin
+mcuboot/target/bootloader/signed_update.hex
+mcuboot/target/bootloader/signing-keys.pem
+mcuboot/target/bootloader/signing_keys.c
+
+# .mbed files
+mcuboot/target/application/.mbed
+mcuboot/target/bootloader/.mbed
