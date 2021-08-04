@@ -94,7 +94,7 @@ valid_mount () {
     say note "Mount point not provided - binaries will not be flashed."
     skip=1
   else
-    [ -d "$mount" ] || fail exit "Mount point invalid" \
+    [ -d "$mount" ] || fail "Mount point invalid" \
                                  "Please check the path and if the board is connected" \
                                  "Tip: Use mbed-ls to identify the mount point path"
   fi
@@ -105,7 +105,7 @@ valid_mount () {
 valid_example () {
   case $example in
     mock|mcuboot) ;;
-    *) fail exit "Invalid example" "Supported examples - [mock|mcuboot]" ;;
+    *) fail "Invalid example" "Supported examples - [mock|mcuboot]" ;;
   esac
 }
 
@@ -114,7 +114,7 @@ valid_example () {
 valid_board () {
   case $board in
     NRF52840_DK) ;;
-    *) fail exit "Unsupported board" "The only supported board is NRF52840_DK"
+    *) fail "Unsupported board" "The only supported board is NRF52840_DK"
   esac
 }
 
@@ -122,7 +122,7 @@ valid_board () {
 valid_toolchain () {
   case $toolchain in
     GCC_ARM) ;;
-    *) fail exit "Unsupported toolchain" "The only supported toolchain is GCC_ARM"
+    *) fail "Unsupported toolchain" "The only supported toolchain is GCC_ARM"
   esac
 }
 
@@ -144,7 +144,7 @@ setup_virtualenv () {
     # Create the venv directory and setup the virtual environment
     # shellcheck disable=SC2015
     mkdir venv && python3 -m venv venv \
-      || fail exit "Virtual environment creation failed!" "Tip: Check your python installation!"
+      || fail "Virtual environment creation failed!" "Tip: Check your python installation!"
   fi
   source venv/bin/activate
   say success "Virtual environment activated"
@@ -155,7 +155,7 @@ install_requirements () {
   say message "Installing/updating requirements silently..."
   # shellcheck disable=SC2015
   pip install -q --upgrade pip && pip install -q -r "$root/requirements.txt" \
-    || fail exit "Unable to install requirements!" "Please take a look at requirements.txt"
+    || fail "Unable to install requirements!" "Please take a look at requirements.txt"
   say success "General requirements installed/updated"
 }
 
@@ -172,7 +172,7 @@ build_example () {
 # Cleanup routine that runs when the program exits (either successfully or abruptly)
 cleanup () {
   # If unsuccessful termination, then clean the build
-  [ "$1" -eq 1 ] && clean
+  if [[ "$1" -eq 1 ]]; then clean; fi
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -189,7 +189,7 @@ main () {
   root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd -P)
 
   setup_formatting
-  parse_options "$@" || fail exit "Unrecognised option" "Please use -h or --help for usage"
+  parse_options "$@" || fail "Unrecognised option" "Please use -h or --help for usage"
 
   check_usage
   setup_virtualenv
