@@ -1,0 +1,38 @@
+name: Build Examples
+on:
+  workflow_dispatch:
+  pull_request:
+jobs:
+  build-mock:
+    runs-on: ubuntu-latest
+    container: mbedos/mbed-os-env:latest
+    steps:
+      # Checkout the repo and download it to the runner
+      - name: Checkout
+        uses: actions/checkout@v2
+      # Install the venv module
+      - name: Install dependencies
+        run: |
+          apt-get update -y
+          apt-get install -y python3-venv
+      # Run the fota build tool with mock as the option
+      - name: Build example
+        run: ./scripts/fota.sh -e=mock
+
+  build-mcuboot:
+    runs-on: ubuntu-latest
+    container: mbedos/mbed-os-env:latest
+    steps:
+      # Checkout the repo and download it to the runner
+      - name: Checkout
+        uses: actions/checkout@v2
+      # jq is a command-line JSON processor
+      - name: Install dependencies
+        run: |
+          apt-get update -y
+          apt-get install -y jq python3-venv
+      # Pipe "yes" into the script to select the appropriate option
+      # More information about this in the documentation
+      # Run the fota build tool with mcuboot as the option
+      - name: Build example
+        run: yes | ./scripts/fota.sh -e=mcuboot
