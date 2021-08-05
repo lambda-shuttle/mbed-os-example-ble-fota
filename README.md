@@ -7,10 +7,10 @@ This repository houses example applications built for the Arm® Mbed™ OS platf
 
 The examples come with _batteries included!_ They're bundled with an automated build tool, "fota.sh", that eases the build process for the end-user. Please refer to the sections below for more information.
 
-## 📝 Pre-requisites
+## Pre-requisites
 Currently, the only supported target board for the examples is the [`NRF52840_DK`](https://os.mbed.com/platforms/Nordic-nRF52840-DK/). Development work to support [`DISCO_L475VG_IOT01A`](https://os.mbed.com/platforms/ST-Discovery-L475E-IOT01A/) will commence soon. The [BLE documentation](https://os.mbed.com/docs/mbed-os/v6.12/apis/ble.html) describes the BLE APIs available on Mbed™ OS; going through this documentation isn't strictly essential to run the examples, but is helpful in understanding the sources.
 
-## 🛠 Build Tool
+## Build Tool
 The `fota.sh` cli tool aids in setup and build of the examples in this repository. The tool takes in as arguments the example, target board, mount point of the target board, and toolchain. Please run `./scripts/fota.sh --help` for usage instructions.
 
 > **Note**: If the mount point is not provided (it could be the case that an end-user is trying to build without the board connected), then the target binary is not flashed. This is especially useful for building the examples with a CI workflow.
@@ -19,11 +19,13 @@ The `fota.sh` cli tool aids in setup and build of the examples in this repositor
 >
 > **Important**: For now, the tool assumes the target board, toolchain, and example unless otherwise specified by the end-user. Currently, the only board and toolchain supported are `NRF52840_DK` and `GCC_ARM` respectively.
 
-## 📦 Examples
+## Examples
 
-🚧 _Section under construction..._ 🚧
+Please refer to the example-specific READMEs for build and demonstration instructions.
+1. [Mock Example](Mock)
+2. [MCUboot Example](MCUboot)
 
-## ☣️ Known Issues
+## Known Issues
 There are slight kludges with how the MCUboot and Mock examples are built with `fota.sh`. The former is a direct result of dependency conflicts between [mbed-tools](https://github.com/ARMmbed/mbed-tools), [pyocd](https://github.com/pyocd/pyOCD), and [mbed-os](https://github.com/ARMmbed/mbed-os). The latter is a result of issues with flashing the target binary to the connected board. The details of both are addressed below:
 
 1. **Dependency Conflicts**: The difference in version requirements of the [PyYAML](https://pyyaml.org) dependency imposed by both mbed-os and pyocd led to the creation of a temporary virtual environment; this is used in the "_creating and flashing the factory firmware_" stage of the MCUboot example build process. This is a known issue and would require changes to the `requirements.txt` file in the mbed-os to resolve.\
@@ -36,15 +38,15 @@ There are slight kludges with how the MCUboot and Mock examples are built with `
     ``` 
    The tool is looking for a hex file under the cmake build output whose name comes from project directory (in this case, "target"). However, the generated one is named `BLE_GattServer_FOTAService.hex`. Again, this is a known issue and has been [filed](https://github.com/ARMmbed/mbed-tools/issues/282) (282) in the mbed-tools repository by [noonfom](https://github.com/noonfom).
 
-## 📜 License
+## License
 The software in this repository is licensed under Apache-2.0. Please refer to [LICENSE](LICENSE) for more information. 
 
-## 🤝 Contributions
+## Contributions
 Mbed™ OS is an open-source, device software platform for the Internet of Things. Contributions are an important part of the platform, and our goal is to make it as simple as possible to become a contributor. Contributions to this repository are **greatly appreciated** and accepted under the same Apache-2.0 license. To encourage productive collaboration, as well as robust, consistent and maintainable code, we have a set of guidelines for [contributing to Mbed™ OS](https://os.mbed.com/docs/mbed-os/latest/contributing/index.html).
 
 > **Important**: Please target the `development` branch of this repository for pull requests.
 
-## 👀 Related
+## Related
 
 * [mbed-os-example-ble](https://github.com/ARMmbed/mbed-os-example-ble)
 * [mbed-os-experimental-ble-services](https://github.com/ARMmbed/mbed-os-experimental-ble-services)
