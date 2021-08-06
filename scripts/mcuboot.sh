@@ -180,7 +180,7 @@ mcuboot_build () {
   arm-none-eabi-objcopy -I ihex -O binary signed_update.hex signed_update.bin || \
     fail "Failed to extract binary from elf" "Tip: Check if arm-none-eabi-objcopy is in your path"
 
-  say message "Update binary at $root/MCUboot/target/bootloader/signed_update.hex"
+  say message "Update binary at $root/MCUboot/target/bootloader/signed_update.bin"
   say success "Build Complete" "Please refer to the documentation for demonstration instructions"
 }
 
