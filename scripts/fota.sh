@@ -59,7 +59,7 @@ EOF
 
 # This function would clean up the example builds and generated files
 clean () {
-  say message "Cleaning builds and generated files..."
+  log message "Cleaning builds and generated files..."
   
   rm -rf "$root/venv"
 
@@ -67,7 +67,7 @@ clean () {
   mock_clean "$root"
   mcuboot_clean "$root"
 
-  say success "All neat and tidy now" && exit
+  log success "All neat and tidy now" && exit
 }
 
 # Parses the options specified by the end-user and either assigns the corresponding variable or calls a function and
@@ -91,7 +91,7 @@ parse_options () {
 # indicating that binaries will have to be flashed manually.
 valid_mount () {
   if [[ -z $mount ]]; then
-    say note "Mount point not provided - binaries will not be flashed."
+    log note "Mount point not provided - binaries will not be flashed."
     skip=1
   else
     [ -d "$mount" ] || fail "Mount point invalid" \
@@ -137,9 +137,9 @@ check_usage () {
 # Setups up the main virtual environment and activates it
 setup_virtualenv () {
   if [[ -d venv ]]; then
-    say message "Using existing virtual environment venv..."
+    log message "Using existing virtual environment venv..."
   else
-    say message "Creating virtual environment..."
+    log message "Creating virtual environment..."
 
     # Create the venv directory and setup the virtual environment
     # shellcheck disable=SC2015
@@ -147,16 +147,16 @@ setup_virtualenv () {
       || fail "Virtual environment creation failed!" "Tip: Check your python installation!"
   fi
   source venv/bin/activate
-  say success "Virtual environment activated"
+  log success "Virtual environment activated"
 }
 
 # Installs the required python dependencies silently and notify if there's any issue in the installation.
 install_requirements () {
-  say message "Installing/updating requirements silently..."
+  log message "Installing/updating requirements silently..."
   # shellcheck disable=SC2015
   pip install -q --upgrade pip && pip install -q -r "$root/requirements.txt" \
     || fail "Unable to install requirements!" "Please take a look at requirements.txt"
-  say success "General requirements installed/updated"
+  log success "General requirements installed/updated"
 }
 
 # Call the build functions corresponding to the selected example

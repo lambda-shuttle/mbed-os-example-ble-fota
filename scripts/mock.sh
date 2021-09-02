@@ -21,7 +21,7 @@ source scripts/utils.sh
 mock_build () {
   toolchain=$1; board=$2; mount=$3; skip=$4; root=$5
 
-  say message "Installing/updating example-specific dependencies..."
+  log message "Installing/updating example-specific dependencies..."
   # 1. Install mbed-os and mbed-os experimental-ble-services
   # shellcheck disable=SC2015
   cd "$root/Mock/target" && mbed-tools deploy || \
@@ -32,10 +32,10 @@ mock_build () {
     fail "Unable to install mbed-os requirements" "Please take a look at mbed-os/requirements.txt"
 
   # A short message addressing the known Click dependency conflict - this should be removed once resolved.
-  say note "Click dependency conflict" \
+  log note "Click dependency conflict" \
            "This is a known issue and does not hinder the build process" \
            "Refer to the documentation for more information"
-  say success "Example requirements installed/updated"
+  log success "Example requirements installed/updated"
 
   out="cmake_build/$board/develop/$toolchain"
   # 3. Compile the example with the target board and toolchain
@@ -51,12 +51,12 @@ mock_build () {
   if [[ "$skip" -eq 0 ]]; then
     cp "$out/BLE_GattServer_FOTAService.bin" "$mount" || \
       fail "Unable to flash binary!" "Please ensure the board is connected"
-    say success "Binary flashed"
+    log success "Binary flashed"
   else
-    say message "Binary at $root/Mock/target/$out/BLE_GattServer_FOTAService.bin"
+    log message "Binary at $root/Mock/target/$out/BLE_GattServer_FOTAService.bin"
   fi
 
-  say success "Build Complete" "Please refer to the documentation for demonstration instructions"
+  log success "Build Complete" "Please refer to the documentation for demonstration instructions"
 }
 
 # Clean build files and dependencies specific to this example

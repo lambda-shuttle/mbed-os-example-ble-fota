@@ -21,7 +21,7 @@ prompt_auto_update () {
     case $response in
         [Yy]*) auto_update=1                          ; break ;;
         [Nn]*) auto_update=0                          ; break ;;
-        *)     say message "Please answer yes or no." ;;
+        *)     log message "Please answer yes or no." ;;
     esac
   done
 }
@@ -36,7 +36,7 @@ mcuboot_build () {
   application=$root/MCUboot/target/application
   bootloader=$root/MCUboot/target/bootloader
 
-  say message "Installing/updating example-specific dependencies..."
+  log message "Installing/updating example-specific dependencies..."
   # 1. Install application dependencies - mbed-os
   # shellcheck disable=SC2015
   cd "$application" && mbed-tools deploy || \
@@ -54,7 +54,7 @@ mcuboot_build () {
     fail "Unable to install mbed-os requirements" "Please take a look at mbed-os/requirements.txt"
 
   # A short message addressing the known Click dependency conflict - this should be removed once resolved.
-  say note "Click dependency conflict" \
+  log note "Click dependency conflict" \
            "This is a known issue and does not hinder the build process" \
            "Refer to the documentation for more information"
 
@@ -66,8 +66,8 @@ mcuboot_build () {
   python mcuboot/scripts/setup.py install || \
     fail "MCUboot setup script failed"
 
-  say success "Example requirements installed/updated"
-  say message "Creating the signing keys and building the bootloader..."
+  log success "Example requirements installed/updated"
+  log message "Creating the signing keys and building the bootloader..."
 
   # 6. Create the signing keys
   # shellcheck disable=SC2015
@@ -80,8 +80,8 @@ mcuboot_build () {
   mbed compile -t "$toolchain" -m "$board" || \
     fail "Failed to compile the bootloader" "Please check the sources"
 
-  say success "Created signing keys and built the bootloader"
-  say message "Building and signing the primary application..."
+  log success "Created signing keys and built the bootloader"
+  log message "Building and signing the primary application..."
 
   # 8. Build the primary application using the old mbed-cli
   # shellcheck disable=SC2015
@@ -95,16 +95,16 @@ mcuboot_build () {
     --pad application.hex signed_application.hex || \
       fail "Unable to sign the primary application"
 
-  say success "Built and signed the primary application"
-  say message "Deactivating virtual environment to setup a new one..."
-  say note "PyYAML dependency conflict" \
+  log success "Built and signed the primary application"
+  log message "Deactivating virtual environment to setup a new one..."
+  log note "PyYAML dependency conflict" \
            "pyocd and mbed-os confict in their version requirements of PyYAML" \
            "Refer to the documentation for more information."
 
   # 9. Deactivate the primary virtual environment
   deactivate
 
-  say message "Creating temporary virtual environment..."
+  log message "Creating temporary virtual environment..."
 
   # 10. Create a new, temporary virtual environment just for pyocd and intelhex
   # shellcheck disable=SC2015
@@ -114,15 +114,15 @@ mcuboot_build () {
   # 11. Activate temporary virtual environment
   source venv/bin/activate
 
-  say success "Temporary virtual environment activated"
-  say message "Installing requirements (pyocd and intelhex) silently..."
+  log success "Temporary virtual environment activated"
+  log message "Installing requirements (pyocd and intelhex) silently..."
 
   # 12. Install requirements (pyocd and intelhex) for temporary environment (silently)
   # shellcheck disable=SC2015
   pip install -q --upgrade pip && pip install -q pyocd==0.30.3 intelhex==2.3.0 || \
     fail "Unable to install temporary venv requirements" "Please check scripts/mcuboot.sh"
 
-  say success "Requirements installed/updated"
+  log success "Requirements installed/updated"
 
   # 13. Create the factory firmware
   hexmerge.py -o merged.hex --no-start-addr "BUILD/$board/$toolchain/bootloader.hex" signed_application.hex || \
@@ -132,9 +132,9 @@ mcuboot_build () {
   if [[ "$skip" -eq 0 ]]; then
     pyocd erase --chip && cp merged.hex "$mount" \\
       fail "Unable to flash firmware!" "Please ensure the board is connected"
-    say success "Factory firmware flashed"
+    log success "Factory firmware flashed"
   else
-    say message "Factory firmware at $root/MCUboot/target/bootloader/merged.hex"
+    log message "Factory firmware at $root/MCUboot/target/bootloader/merged.hex"
   fi
 
   # 15. Deactivate and restore virtual environment
@@ -148,7 +148,7 @@ mcuboot_build () {
 
   if [[ "$auto_update" -eq 0 ]]; then
     # User updates the binary manually, in which case we wait for them to do so
-    say message "Please update the app version number in application/mbed_app.json" \
+    log message "Please update the app version number in application/mbed_app.json" \
                 "Once done, press ENTER to continue..."
     while read -r -n 1 key
     do
@@ -164,7 +164,7 @@ mcuboot_build () {
           fail "Failed in updating application/mbed_app.json" "Please check scripts/mcuboot.sh"
   fi
 
-  say message "Creating the update binary..."
+  log message "Creating the update binary..."
 
   # shellcheck disable=SC2015
   cd "$application" && mbed compile -t "$toolchain" -m "$board" || \
@@ -180,8 +180,8 @@ mcuboot_build () {
   arm-none-eabi-objcopy -I ihex -O binary signed_update.hex signed_update.bin || \
     fail "Failed to extract binary from elf" "Tip: Check if arm-none-eabi-objcopy is in your path"
 
-  say message "Update binary at $root/MCUboot/target/bootloader/signed_update.bin"
-  say success "Build Complete" "Please refer to the documentation for demonstration instructions"
+  log message "Update binary at $root/MCUboot/target/bootloader/signed_update.bin"
+  log success "Build Complete" "Please refer to the documentation for demonstration instructions"
 }
 
 # Clean build files and dependencies specific to this example

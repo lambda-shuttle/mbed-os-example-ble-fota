@@ -27,7 +27,7 @@ setup_formatting () {
 }
 
 # Says (i.e. prints) a message to the console with formatting based on the selected formatting mode.
-say () {
+log () {
   case $1 in
     error)
       # The first line of the message is treated as the message heading and is marked in bold red along with an "ERROR:"
@@ -60,6 +60,6 @@ say () {
 
 # Prints an error message to stderr and exits (or returns) with a code of 1
 fail () {
-  say error "$@"
+  log error "$@"
   exit 1
 }
