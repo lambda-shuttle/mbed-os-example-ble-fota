@@ -27,7 +27,7 @@
 #include "platform/mbed_power_mgmt.h"
 #include "mbed-trace/mbed_trace.h"
 #include "bootutil/bootutil.h"
-#include "secondary_bd.h"
+#include "flash_map_backend/secondary_bd.h"
 
 #define TRACE_GROUP "MAIN"
 
