@@ -41,13 +41,13 @@ mcuboot_build () {
   # shellcheck disable=SC2015
   cd "$application" && mbed-tools deploy || \
     fail "Unable to install application dependencies" \
-              "Please check mcuboot.lib, mbed-os.lib, and mbed-os-experimental-ble-services.lib"
+         "Please check mcuboot.lib, mbed-os.lib, and mbed-os-experimental-ble-services.lib"
 
   # 2. Install bootloader dependencies
   # shellcheck disable=SC2015
   cd "$bootloader" && mbed-tools deploy || \
     fail "Unable to install bootloader dependencies" \
-              "Please check mcuboot.lib and mbed-os.lib"
+         "Please check mcuboot.lib and mbed-os.lib"
 
   # 3. Install mbed-os python dependencies (silently)
   pip install -q -r mbed-os/requirements.txt || \
@@ -84,15 +84,16 @@ mcuboot_build () {
   log message "Building and signing the primary application..."
 
   # 8. Build the primary application using mbed-tools
-  # shellcheck disable=SC2015
+  # shellcheck disable=SC2015  
+  out="cmake_build/$board/develop/$toolchain"
   cd "$application" && mbed-tools compile -t "$toolchain" -m "$board" || \
     fail "Failed to compile the bootloader" "Please check the sources"
 
   # shellcheck disable=SC2015
-  cp "cmake_build/$board/$toolchain/application.hex" "$bootloader" && cd "$bootloader" && \
+  cp "$out/application.hex" "$bootloader" && cd "$bootloader" && \
     mcuboot/scripts/imgtool.py sign -k signing-keys.pem \
     --align 4 -v 0.1.0 --header-size 4096 --pad-header -S 0xC0000 \
-    --pad application.hex signed_application.hex || \
+    application.hex signed_application.hex || \
       fail "Unable to sign the primary application"
 
   log success "Built and signed the primary application"
@@ -125,12 +126,12 @@ mcuboot_build () {
   log success "Requirements installed/updated"
 
   # 13. Create the factory firmware
-  hexmerge.py -o merged.hex --no-start-addr "cmake_build/$board/$toolchain/bootloader.hex" signed_application.hex || \
+  hexmerge.py -o merged.hex --no-start-addr "$out/bootloader.hex" signed_application.hex || \
     fail "Unable to create factory firmware"
 
   # 14. Flash the board with the binary (if skip is 0)
   if [[ "$skip" -eq 0 ]]; then
-    pyocd erase --chip && pyocd flash merged.hex \\
+    pyocd erase --chip && pyocd flash merged.hex || \
       fail "Unable to flash firmware!" "Please ensure the board is connected"
     log success "Factory firmware flashed"
   else
@@ -171,7 +172,7 @@ mcuboot_build () {
     fail "Failed to compile the application" "Please check the sources"
 
   # shellcheck disable=SC2015
-  cp "cmake_build/$board/$toolchain/application.hex" "$bootloader" && cd "$bootloader" && \
+  cp "$out/application.hex" "$bootloader" && cd "$bootloader" && \
     mcuboot/scripts/imgtool.py sign -k signing-keys.pem \
     --align 4 -v 0.1.1 --header-size 4096 --pad-header -S 0x55000 \
     application.hex signed_update.hex || \

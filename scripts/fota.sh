@@ -25,7 +25,7 @@
 #            respectively.
 
 set -e
-trap 'cleanup $?' SIGINT SIGTERM ERR
+trap 'cleanup $?' SIGINT SIGTERM ERR EXIT
 
 source scripts/utils.sh
 source scripts/mock.sh
