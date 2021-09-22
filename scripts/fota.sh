@@ -15,14 +15,14 @@
 
 # Author's Note:
 # The fota cli tool is used to setup and build the ble fota examples in this repository. The tool takes in as
-# arguments the example, target board, mount point of the target board, and toolchain. Note that if the mount point
-# is not provided (it could be the case that an end-user is trying to build without the board connected), then the
-# target binary is not flashed. In the case of the MCUboot example, the "factory firmware" is saved and would require
-# manual transfer when the board is indeed connected. In either case, the demonstration step would be the only part
-# that requires manual intervention.
+# arguments the example, target board and toolchain. Note that if the flash option is not provided (it could be the case
+# that an end-user is trying to build without the board connected), then the target binary is not flashed. In the case 
+# of the MCUboot example, the "factory firmware" is saved and would require manual transfer when the board is indeed 
+# connected. In either case, the demonstration step would be the only part that requires manual intervention.
 #
 # Important: The tool assumes the target board and toolchain unless otherwise specified by the end-user. However,
-#            currently, the only board and toolchain supported are NRF52840_DK and GCC_ARM respectively.
+#            currently, the only boards and toolchain supported are NRF52840_DK and DISCO_L475VG_IOT01A and GCC_ARM 
+#            respectively.
 
 set -e
 trap 'cleanup $?' SIGINT SIGTERM ERR EXIT
@@ -46,28 +46,15 @@ Options:
                                   [default: GCC_ARM]
   -b=, --board=TEXT               A build target for an Mbed-enabled device.
                                   [default: NRF52840_DK]
-  -m=, --mount=TEXT               Path to the mount point of the target board.
+  -f, --flash                     Flash the connected target board
   -c, --clean                     Clean the example builds and environment
   -h, --help                      Print this message and exit
 
 Note:
-  For now, only the NRF52840_DK board and GCC_ARM toolchain are supported. Also,
-  if a mount point isn't provided, then the target binary is not flashed.
+  For now, only the NRF52840_DK and DISCO_L475VG_IOT01A boards and GCC_ARM 
+  toolchain are supported. Please connect only one target board when flashing. 
 EOF
   exit
-}
-
-# This function would clean up the example builds and generated files
-clean () {
-  log message "Cleaning builds and generated files..."
-  
-  rm -rf "$root/venv"
-
-  # Clean example-specific files and folders
-  mock_clean "$root"
-  mcuboot_clean "$root"
-
-  log success "All neat and tidy now" && exit
 }
 
 # Parses the options specified by the end-user and either assigns the corresponding variable or calls a function and
@@ -79,25 +66,12 @@ parse_options () {
       -e=*|--example=*)   example="${i#*=}"   ; shift  ;;
       -t=*|--toolchain=*) toolchain="${i#*=}" ; shift  ;;
       -b=*|--board=*)     board="${i#*=}"     ; shift  ;;
-      -m=*|--mount=*)     mount="${i#*=}"     ; shift  ;;
-      -c|--clean)         clean               ;;
+      -f|--flash)         skip=0              ; shift  ;;
+      -c|--clean)         clean=1             ;;
       -h|--help)          usage               ;;
       *)                  return 1            ;;
     esac
   done
-}
-
-# Check that the provided target board mount point is valid. If the mount point is not provided, display a short message
-# indicating that binaries will have to be flashed manually.
-valid_mount () {
-  if [[ -z $mount ]]; then
-    log note "Mount point not provided - binaries will not be flashed."
-    skip=1
-  else
-    [ -d "$mount" ] || fail "Mount point invalid" \
-                                 "Please check the path and if the board is connected" \
-                                 "Tip: Use mbed-ls to identify the mount point path"
-  fi
 }
 
 # Checks if the example is either mock or mcuboot. If more examples, are added in the future, this function would have
@@ -114,7 +88,8 @@ valid_example () {
 valid_board () {
   case $board in
     NRF52840_DK) ;;
-    *) fail "Unsupported board" "The only supported board is NRF52840_DK"
+    DISCO_L475VG_IOT01A) ;;
+    *) fail "Unsupported board" "The only supported boards are NRF52840_DK and DISCO_L475VG_IOT01A"
   esac
 }
 
@@ -128,13 +103,12 @@ valid_toolchain () {
 
 # A series of checks to make sure that the program options are valid
 check_usage () {
-  valid_mount
   valid_example
   valid_board
   valid_toolchain
 }
 
-# Setups up the main virtual environment and activates it
+# Sets up the main virtual environment and activates it
 setup_virtualenv () {
   if [[ -d venv ]]; then
     log message "Using existing virtual environment venv..."
@@ -162,17 +136,27 @@ install_requirements () {
 # Call the build functions corresponding to the selected example
 # Pre: The example is valid and so are all other arguments.
 build_example () {
-  args=("$toolchain" "$board" "$mount" "$skip" "$root")
+  args=("$toolchain" "$board" "$skip" "$root")
   case $example in
     mock)    mock_build "${args[@]}"    ;;
     mcuboot) mcuboot_build "${args[@]}" ;;
   esac
 }
 
-# Cleanup routine that runs when the program exits (either successfully or abruptly)
+# This function would clean up the example builds and generated files; the routine runs when the program exits (etiher
+# successfully or abruptly)
 cleanup () {
-  # If unsuccessful termination, then clean the build
-  if [[ "$1" -eq 1 ]]; then clean; fi
+  if [[ "$clean" -eq 1 ]]; then
+    log message "Cleaning builds and generated files..."
+  
+    rm -rf "$root/venv"
+
+    # Clean example-specific files and folders
+    mock_clean "$root"
+    mcuboot_clean "$root"
+
+    log success "All neat and tidy now" && exit
+  fi
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -183,7 +167,8 @@ main () {
   example="mock"
   toolchain="GCC_ARM"
   board="NRF52840_DK"
-  skip=0               # Skip the binary flashing if mount point is missing - Default: false
+  skip=1               # Skip the binary flashing if the -f or --flash is missing - Default: true
+  clean=0              # Clean the build files and dependencies - Default: false
 
   # Root directory of repository
   root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd -P)

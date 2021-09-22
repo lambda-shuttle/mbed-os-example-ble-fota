@@ -26,11 +26,11 @@ prompt_auto_update () {
   done
 }
 
-# Builds the mcuboot example and flashes the binaries if a mount is provided.
+# Builds the mcuboot example and flashes the binaries if -f or --flash is provided
 # Please refer to the commented steps for more information
 # Pre: Arguments passed here are all valid
 mcuboot_build () {
-  toolchain=$1; board=$2; mount=$3; skip=$4; root=$5
+  toolchain=$1; board=$2; skip=$3; root=$4
 
   # Paths to application and bootloader
   application=$root/MCUboot/target/application
@@ -41,13 +41,13 @@ mcuboot_build () {
   # shellcheck disable=SC2015
   cd "$application" && mbed-tools deploy || \
     fail "Unable to install application dependencies" \
-              "Please check mcuboot.lib, mbed-os.lib, and mbed-os-experimental-ble-services.lib"
+         "Please check mcuboot.lib, mbed-os.lib, and mbed-os-experimental-ble-services.lib"
 
   # 2. Install bootloader dependencies
   # shellcheck disable=SC2015
   cd "$bootloader" && mbed-tools deploy || \
     fail "Unable to install bootloader dependencies" \
-              "Please check mcuboot.lib and mbed-os.lib"
+         "Please check mcuboot.lib and mbed-os.lib"
 
   # 3. Install mbed-os python dependencies (silently)
   pip install -q -r mbed-os/requirements.txt || \
@@ -75,24 +75,25 @@ mcuboot_build () {
     mcuboot/scripts/imgtool.py getpub -k signing-keys.pem >> signing_keys.c || \
       fail "Unable to create the signing keys"
 
-  # 7. Build the bootloader using the old mbed-cli
+  # 7. Build the bootloader using mbed-tools
   # Note: This does not silence errors
-  mbed compile -t "$toolchain" -m "$board" || \
+  mbed-tools compile -t "$toolchain" -m "$board" || \
     fail "Failed to compile the bootloader" "Please check the sources"
 
   log success "Created signing keys and built the bootloader"
   log message "Building and signing the primary application..."
 
-  # 8. Build the primary application using the old mbed-cli
-  # shellcheck disable=SC2015
-  cd "$application" && mbed compile -t "$toolchain" -m "$board" || \
+  # 8. Build the primary application using mbed-tools
+  # shellcheck disable=SC2015  
+  out="cmake_build/$board/develop/$toolchain"
+  cd "$application" && mbed-tools compile -t "$toolchain" -m "$board" || \
     fail "Failed to compile the bootloader" "Please check the sources"
 
   # shellcheck disable=SC2015
-  cp "BUILD/$board/$toolchain/application.hex" "$bootloader" && cd "$bootloader" && \
+  cp "$out/application.hex" "$bootloader" && cd "$bootloader" && \
     mcuboot/scripts/imgtool.py sign -k signing-keys.pem \
     --align 4 -v 0.1.0 --header-size 4096 --pad-header -S 0xC0000 \
-    --pad application.hex signed_application.hex || \
+    application.hex signed_application.hex || \
       fail "Unable to sign the primary application"
 
   log success "Built and signed the primary application"
@@ -125,12 +126,12 @@ mcuboot_build () {
   log success "Requirements installed/updated"
 
   # 13. Create the factory firmware
-  hexmerge.py -o merged.hex --no-start-addr "BUILD/$board/$toolchain/bootloader.hex" signed_application.hex || \
+  hexmerge.py -o merged.hex --no-start-addr "$out/bootloader.hex" signed_application.hex || \
     fail "Unable to create factory firmware"
 
   # 14. Flash the board with the binary (if skip is 0)
   if [[ "$skip" -eq 0 ]]; then
-    pyocd erase --chip && cp merged.hex "$mount" \\
+    pyocd erase --chip && pyocd flash merged.hex || \
       fail "Unable to flash firmware!" "Please ensure the board is connected"
     log success "Factory firmware flashed"
   else
@@ -167,11 +168,11 @@ mcuboot_build () {
   log message "Creating the update binary..."
 
   # shellcheck disable=SC2015
-  cd "$application" && mbed compile -t "$toolchain" -m "$board" || \
+  cd "$application" && mbed-tools compile -t "$toolchain" -m "$board" || \
     fail "Failed to compile the application" "Please check the sources"
 
   # shellcheck disable=SC2015
-  cp "BUILD/$board/$toolchain/application.hex" "$bootloader" && cd "$bootloader" && \
+  cp "$out/application.hex" "$bootloader" && cd "$bootloader" && \
     mcuboot/scripts/imgtool.py sign -k signing-keys.pem \
     --align 4 -v 0.1.1 --header-size 4096 --pad-header -S 0x55000 \
     application.hex signed_update.hex || \
@@ -193,11 +194,11 @@ mcuboot_clean () {
 
   # Remove generated files and folders in bootloader folder
   rm -rf "$bootloader"/sign* "$bootloader/application.hex" "$bootloader/merged.hex"
-  rm -rf "$bootloader/build" "$bootloader/dist" "$bootloader/imgtool.egg-info"
+  rm -rf "$bootloader/cmake_build" "$bootloader/dist" "$bootloader/imgtool.egg-info"
 
   # Remove bootloader dependencies
   rm -rf "$bootloader/mbed-os" "$bootloader/mcuboot"
 
   # Remove application build folder and dependencies
-  rm -rf "$application/BUILD" "$application/mbed-os" "$application/mbed-os-experimental-ble-services" "$application/mcuboot"
+  rm -rf "$application/cmake_build" "$application/mbed-os" "$application/mbed-os-experimental-ble-services" "$application/mcuboot"
 }
