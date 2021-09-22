@@ -25,7 +25,7 @@
 #            respectively.
 
 set -e
-trap 'cleanup $?' SIGINT SIGTERM ERR EXIT
+trap 'cleanup $?' SIGINT SIGTERM ERR
 
 source scripts/utils.sh
 source scripts/mock.sh
@@ -57,19 +57,6 @@ EOF
   exit
 }
 
-# This function would clean up the example builds and generated files
-clean () {
-  log message "Cleaning builds and generated files..."
-  
-  rm -rf "$root/venv"
-
-  # Clean example-specific files and folders
-  mock_clean "$root"
-  mcuboot_clean "$root"
-
-  log success "All neat and tidy now" && exit
-}
-
 # Parses the options specified by the end-user and either assigns the corresponding variable or calls a function and
 # exits (i.e. in the case of help and clean). If the option is unrecognised, the function returns 1, which triggers
 # a fail that exits the tools and displays an error on stderr.
@@ -79,8 +66,8 @@ parse_options () {
       -e=*|--example=*)   example="${i#*=}"   ; shift  ;;
       -t=*|--toolchain=*) toolchain="${i#*=}" ; shift  ;;
       -b=*|--board=*)     board="${i#*=}"     ; shift  ;;
-      -f|--flash)         skip=1              ; shift  ;;
-      -c|--clean)         clean               ;;
+      -f|--flash)         skip=0              ; shift  ;;
+      -c|--clean)         clean=1             ;;
       -h|--help)          usage               ;;
       *)                  return 1            ;;
     esac
@@ -156,10 +143,20 @@ build_example () {
   esac
 }
 
-# Cleanup routine that runs when the program exits (either successfully or abruptly)
+# This function would clean up the example builds and generated files; the routine runs when the program exits (etiher
+# successfully or abruptly)
 cleanup () {
-  # If unsuccessful termination, then clean the build
-  if [[ "$1" -eq 1 ]]; then clean; fi
+  if [[ "$clean" -eq 1 ]]; then
+    log message "Cleaning builds and generated files..."
+  
+    rm -rf "$root/venv"
+
+    # Clean example-specific files and folders
+    mock_clean "$root"
+    mcuboot_clean "$root"
+
+    log success "All neat and tidy now" && exit
+  fi
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -170,7 +167,8 @@ main () {
   example="mock"
   toolchain="GCC_ARM"
   board="NRF52840_DK"
-  skip=0               # Skip the binary flashing if the -f or --flash is missing - Default: false
+  skip=1               # Skip the binary flashing if the -f or --flash is missing - Default: true
+  clean=0              # Clean the build files and dependencies - Default: false
 
   # Root directory of repository
   root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd -P)
