@@ -22,7 +22,8 @@
 # that requires manual intervention.
 #
 # Important: The tool assumes the target board and toolchain unless otherwise specified by the end-user. However,
-#            currently, the only board and toolchain supported are NRF52840_DK and GCC_ARM respectively.
+#            currently, the only boards and toolchain supported are NRF52840_DK and DISCO_L475VG_IOT01A and GCC_ARM 
+#            respectively.
 
 set -e
 trap 'cleanup $?' SIGINT SIGTERM ERR EXIT
@@ -51,8 +52,9 @@ Options:
   -h, --help                      Print this message and exit
 
 Note:
-  For now, only the NRF52840_DK board and GCC_ARM toolchain are supported. Also,
-  if a mount point isn't provided, then the target binary is not flashed.
+  For now, only the NRF52840_DK and DISCO_L475VG_IOT01A boards and GCC_ARM 
+  toolchain are supported. Also, if a mount point isn't provided, then the 
+  target binary is not flashed.
 EOF
   exit
 }
@@ -114,7 +116,8 @@ valid_example () {
 valid_board () {
   case $board in
     NRF52840_DK) ;;
-    *) fail "Unsupported board" "The only supported board is NRF52840_DK"
+    DISCO_L475VG_IOT01A) ;;
+    *) fail "Unsupported board" "The only supported boards are NRF52840_DK and DISCO_L475VG_IOT01A"
   esac
 }
 
