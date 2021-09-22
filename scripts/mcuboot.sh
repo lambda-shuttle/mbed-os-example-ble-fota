@@ -26,11 +26,11 @@ prompt_auto_update () {
   done
 }
 
-# Builds the mcuboot example and flashes the binaries if a mount is provided.
+# Builds the mcuboot example and flashes the binaries if -f or --flash is provided
 # Please refer to the commented steps for more information
 # Pre: Arguments passed here are all valid
 mcuboot_build () {
-  toolchain=$1; board=$2; mount=$3; skip=$4; root=$5
+  toolchain=$1; board=$2; skip=$3; root=$4
 
   # Paths to application and bootloader
   application=$root/MCUboot/target/application
@@ -130,7 +130,7 @@ mcuboot_build () {
 
   # 14. Flash the board with the binary (if skip is 0)
   if [[ "$skip" -eq 0 ]]; then
-    pyocd erase --chip && cp merged.hex "$mount" \\
+    pyocd erase --chip && pyocd flash merged.hex \\
       fail "Unable to flash firmware!" "Please ensure the board is connected"
     log success "Factory firmware flashed"
   else
