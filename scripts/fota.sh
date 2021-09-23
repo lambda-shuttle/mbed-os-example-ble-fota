@@ -25,7 +25,6 @@
 #            respectively.
 
 set -e
-trap 'cleanup $?' SIGINT SIGTERM ERR EXIT
 
 source scripts/utils.sh
 source scripts/mock.sh
@@ -67,7 +66,7 @@ parse_options () {
       -t=*|--toolchain=*) toolchain="${i#*=}" ; shift  ;;
       -b=*|--board=*)     board="${i#*=}"     ; shift  ;;
       -f|--flash)         skip=0              ; shift  ;;
-      -c|--clean)         clean=1             ;;
+      -c|--clean)         cleanup             ;;
       -h|--help)          usage               ;;
       *)                  return 1            ;;
     esac
@@ -143,20 +142,17 @@ build_example () {
   esac
 }
 
-# This function would clean up the example builds and generated files; the routine runs when the program exits (etiher
-# successfully or abruptly)
+# This function would clean up the example builds and generated files; the routine runs when -c or --clean is passed
 cleanup () {
-  if [[ "$clean" -eq 1 ]]; then
-    log message "Cleaning builds and generated files..."
-  
-    rm -rf "$root/venv"
+  log message "Cleaning builds and generated files..."
 
-    # Clean example-specific files and folders
-    mock_clean "$root"
-    mcuboot_clean "$root"
+  rm -rf "$root/venv"
 
-    log success "All neat and tidy now" && exit
-  fi
+  # Clean example-specific files and folders
+  mock_clean "$root"
+  mcuboot_clean "$root"
+
+  log success "All neat and tidy now" && exit
 }
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -168,7 +164,6 @@ main () {
   toolchain="GCC_ARM"
   board="NRF52840_DK"
   skip=1               # Skip the binary flashing if the -f or --flash is missing - Default: true
-  clean=0              # Clean the build files and dependencies - Default: false
 
   # Root directory of repository
   root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." &>/dev/null && pwd -P)
