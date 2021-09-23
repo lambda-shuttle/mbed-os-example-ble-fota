@@ -8,7 +8,7 @@ To verify the success of the transfer, the application computes the [SHA-256](ht
 
 ## Pre-requisites
 
-To use the Python client, the host computer must have Bluetooth capabilites, either through an inbuilt chipset or via an external USB adapter. This application requires the [NRF52840_DK](https://os.mbed.com/platforms/Nordic-nRF52840-DK/) platform to run; currently, the build tool only supports this platform. You will also need the [GNU ARM Embedded](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm) toolchain and `python3` in your path to build the example.
+To use the Python client, the host computer must have Bluetooth capabilites, either through an inbuilt chipset or via an external USB adapter. You will need the [GNU ARM Embedded](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm) toolchain and `python3` in your path to build the example.
 
 > **Important**: For macOS users, your terminal emulator would have to be granted access to Bluetooth through `System Preferences > Security & Privacy > Pirvacy > Bluetooth`. Click on the padlock to make changes and check the box next to your terminal app. If the app is missing from the menu, click on the `+` icon to add your terminal app to the list.
 
@@ -16,7 +16,7 @@ To use the Python client, the host computer must have Bluetooth capabilites, eit
 
 To build the example, please run the following command from the repository root. To view more information on the steps involved in the build, please refer to the comments in [mock.sh](../scripts/mock.sh).
 ```shell
-./scripts/fota.sh -e=mock
+./scripts/fota.sh -b=DISCO_L475VG_IOT01A -e=mock --flash
 ```
 > **Note**: You can build the example without a connected target board. The script indicates the location of the flash binary at the end of the build; this binary would have to be flashed manually when the target board is indeed connected later.
 

@@ -8,8 +8,6 @@ This demo application extends the [Mock](../Mock) example by including a bootloa
 
 To use the Python client, the host computer must have Bluetooth capabilities, either through an inbuilt chipset or via an external USB adapter.
 
-This application requires the [NRF52840_DK](https://os.mbed.com/platforms/Nordic-nRF52840-DK/) platform to run.
-
 You will also need the [GNU ARM Embedded](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm) toolchain and `python3` in your path to build the example.
 
 > **Important**: For macOS users, your terminal emulator would have to be granted access to Bluetooth through `System Preferences > Security & Privacy > Pirvacy > Bluetooth`. Click on the padlock to make changes and check the box next to your terminal app. If the app is missing from the menu, click on the `+` icon to add your terminal app to the list.
@@ -20,7 +18,7 @@ If you chose to auto-update the `application/mbed_app.json` file, then the [jq](
 
 To build the example, please run the following command from the repository root. To view more information on the steps involved in the build, please refer to the comments in [mcuboot.sh](../scripts/mcuboot.sh).
 ```shell
-./scripts/fota.sh -e=mcuboot
+./scripts/fota.sh -b=DISCO_L475VG_IOT01A -e=mcuboot --flash
 ```
 > **Note**: You can build the example without a connected target board. The script indicates the location of the factory firmware and the update binary. The factory firmware would have to be flashed manually when the target board is indeed connected later. The update binary would be used in the demonstration stage.
 
