@@ -74,7 +74,7 @@ mock_build () {
     log success "Requirements installed/updated"
 
     # 5E. Flash the board with the binary
-    pyocd flash "$out/BLE_GattServer_FOTAService.bin" || \
+    pyocd erase --chip --connect under-reset && pyocd flash --connect under-reset "$out/BLE_GattServer_FOTAService.bin" || \
       fail "Unable to flash binary!" "Please ensure the board is connected"
     log success "Binary flashed"
 

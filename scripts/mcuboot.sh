@@ -131,7 +131,7 @@ mcuboot_build () {
 
   # 14. Flash the board with the binary (if skip is 0)
   if [[ "$skip" -eq 0 ]]; then
-    pyocd erase --chip && pyocd flash merged.hex || \
+    pyocd erase --chip --connect under-reset  && pyocd flash --connect under-reset merged.hex || \
       fail "Unable to flash firmware!" "Please ensure the board is connected"
     log success "Factory firmware flashed"
   else
@@ -194,10 +194,10 @@ mcuboot_clean () {
 
   # Remove generated files and folders in bootloader folder
   rm -rf "$bootloader"/sign* "$bootloader/application.hex" "$bootloader/merged.hex"
-  rm -rf "$bootloader/cmake_build" "$bootloader/dist" "$bootloader/imgtool.egg-info"
+  rm -rf "$bootloader/cmake_build" "$bootloader/dist" "$bootloader/imgtool.egg-info" "$bootloader/build"
 
   # Remove bootloader dependencies
-  rm -rf "$bootloader/mbed-os" "$bootloader/mcuboot"
+  rm -rf "$bootloader/mbed-os" "$bootloader/mcuboot" "$bootloader/venv"
 
   # Remove application build folder and dependencies
   rm -rf "$application/cmake_build" "$application/mbed-os" "$application/mbed-os-experimental-ble-services" "$application/mcuboot"
